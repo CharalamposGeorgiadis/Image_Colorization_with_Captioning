@@ -1,5 +1,5 @@
 # Image_Colorization_with_Captioning
-Repository for a "Pattern Recognitino" assignment.
+Repository for a "Pattern Recognition" assignment.
 
 ## 
 
