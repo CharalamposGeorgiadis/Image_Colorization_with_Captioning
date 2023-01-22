@@ -6,6 +6,12 @@ Repository for a "Pattern Recognitino" assignment.
 ## INSTRUCTIONS
 - Download [train_captions](https://drive.google.com/file/d/1D3EzUK1d1lNhD2hAvRiKPThidiVbP2K_/view?usp=sharing) to `data/coco`.
 - Download [training images](http://images.cocodataset.org/zips/train2014.zip), [validation images](http://images.cocodataset.org/zips/val2014.zip) and [test images](http://images.cocodataset.org/zips/test2014.zip) and unzip to `data/coco`.
+- Downlaod [checkpoints](https://drive.google.com/drive/folders/1uVuNwwoAZTdtsfwvYrqopBUY08KW-3tC?usp=sharing) and unzip to the base directory.
+
+### Train
 - Run `parse_coco.py`
-- To *train* run  `train.py`
-- To *generate captions* run `caption_generator.py`
+- Run `train.py`
+
+### Generate Captions
+- Run `caption_generator.py`
+- Change filename in **Line 41** in `caption_generator.py` to load different pretrained model weights. The `coco_prefix-xxx` and `coco_prefix-latest` models were trained using Grayscale images. The The `coco_weights` model was trained using RGB images.
