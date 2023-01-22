@@ -12,7 +12,7 @@ Repository for a "Pattern Recognition" assignment.
 
 ### Generate Captions
 - Run `caption_generator.py`
-- Change filename in **Line 41** in `caption_generator.py` to load different pretrained model weights. The `coco_prefix_xxx` and `coco_prefix-latest` models were trained using Grayscale images. The The `coco_weights` model was trained using RGB images.
+- Change filename in **Line 41** in `caption_generator.py` to load different pretrained model weights. The `coco_prefix_xxx` and `coco_prefix-latest` models were trained using Grayscale images. The `coco_weights` model was trained using RGB images.
 
 ## Citations
 - Captioning model taken from: [CLIP_prefix_caption](https://github.com/rmokady/CLIP_prefix_caption).
