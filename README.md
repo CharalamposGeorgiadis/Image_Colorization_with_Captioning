@@ -1,5 +1,5 @@
 # Image_Colorization_with_Captioning
-Repository for a "Pattern Recognition" assignment.
+Repository for a "Pattern Recognition" assignment that uses Pytorch.
 
 ## INSTRUCTIONS
 - Download [train_captions](https://drive.google.com/file/d/1D3EzUK1d1lNhD2hAvRiKPThidiVbP2K_/view?usp=sharing) to `data/coco`.
