@@ -5,6 +5,7 @@ from transformers import GPT2LMHeadModel
 
 
 class MLP(nn.Module):
+
     def forward(self, x):
         return self.model(x)
 
@@ -19,7 +20,6 @@ class MLP(nn.Module):
 
 
 class ClipCaptionModel(nn.Module):
-    """Captioning model"""
 
     def get_dummy_token(self, batch_size, device: torch.device):
         return torch.zeros(batch_size, self.prefix_length, dtype=torch.int64, device=device)
