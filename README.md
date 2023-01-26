@@ -4,7 +4,7 @@ Repository for a "Pattern Recognition" assignment that uses Pytorch.
 ## INSTRUCTIONS
 - Download [train_captions](https://drive.google.com/file/d/1D3EzUK1d1lNhD2hAvRiKPThidiVbP2K_/view?usp=sharing) to `data/`.
 - Download [training images](http://images.cocodataset.org/zips/train2014.zip), [validation images](http://images.cocodataset.org/zips/val2014.zip) and [test images](http://images.cocodataset.org/zips/test2014.zip) and unzip to `data/`.
-- Downlaod [checkpoints](https://drive.google.com/drive/folders/1uVuNwwoAZTdtsfwvYrqopBUY08KW-3tC?usp=sharing) and unzip to `checkpoints_captioning/`.
+- Downlaod a [checkpoint](https://drive.google.com/drive/folders/1uVuNwwoAZTdtsfwvYrqopBUY08KW-3tC?usp=sharing) and unzip to `checkpoints_captioning/`. It is recommended to use `coco_prefix_latest.pt`.
 
 ### Train
 - Run `parse_coco.py`
