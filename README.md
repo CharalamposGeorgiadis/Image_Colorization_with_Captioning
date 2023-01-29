@@ -10,31 +10,31 @@ Repository for a "Pattern Recognition" assignment that uses Pytorch.
 - Run `captioning_train.py`
 
 ### Generate Captions
-- To generate captions without training the model, download the [Captioning checkpoint](https://drive.google.com/drive/folders/1uVuNwwoAZTdtsfwvYrqopBUY08KW-3tC?usp=sharing) to `checkpoints_captioning/`.
+- To generate captions without training the model, download the [Captioning checkpoint](https://drive.google.com/file/d/1tP76-ii6Llcaqd7DqTtBa0Fpk2rETIX3/view?usp=share_link) to `checkpoints_captioning/`.
 - Run `caption_generator.py`
 
 ### Train Colorizer
 - Run `colorizer_train.py`
 
 ### Generate Colored Images
-- To generate colored images without training the model, download the [Colorizer checkpoint](https://drive.google.com/drive/folders/1uVuNwwoAZTdtsfwvYrqopBUY08KW-3tC?usp=sharing) to `checkpoints_colorizer/`.
+- To generate colored images without training the model, download the [Colorizer checkpoint](https://drive.google.com/file/d/1jzI9pW4Izdu_0U1LBp12I25P_6pI_OUZ/view?usp=share_link) to `checkpoints_colorizer/`.
 - Run `colorizer_inference.py`
 
 ### Train Combiend Model
-- Download the [Captioning checkpoint](https://drive.google.com/drive/folders/1uVuNwwoAZTdtsfwvYrqopBUY08KW-3tC?usp=sharing) to `checkpoints_captioning/`.
-- Download the [Colorizer checkpoint](https://drive.google.com/drive/folders/1uVuNwwoAZTdtsfwvYrqopBUY08KW-3tC?usp=sharing) to `checkpoints_colorizer/`.
+- Download the [Captioning checkpoint](https://drive.google.com/file/d/1tP76-ii6Llcaqd7DqTtBa0Fpk2rETIX3/view?usp=share_link) to `checkpoints_captioning/`.
+- Download the [Colorizer checkpoint](https://drive.google.com/file/d/1jzI9pW4Izdu_0U1LBp12I25P_6pI_OUZ/view?usp=share_link) to `checkpoints_colorizer/`.
 - Run `combined_model_train.py`
 
 ### Generate Colored Images with the Combined Model
-- Download the [Captioning checkpoint](https://drive.google.com/drive/folders/1uVuNwwoAZTdtsfwvYrqopBUY08KW-3tC?usp=sharing) to `checkpoints_captioning/`.
-- Download the [Colorizer checkpoint](https://drive.google.com/drive/folders/1uVuNwwoAZTdtsfwvYrqopBUY08KW-3tC?usp=sharing) to `checkpoints_colorizer/`.
-- To generate colored images without training the model, download the [Colorizer Combined checkpoint](https://drive.google.com/drive/folders/1uVuNwwoAZTdtsfwvYrqopBUY08KW-3tC?usp=sharing) to `checkpoints_combined_model/`.
+- Download the [Captioning checkpoint](https://drive.google.com/file/d/1tP76-ii6Llcaqd7DqTtBa0Fpk2rETIX3/view?usp=share_link) to `checkpoints_captioning/`.
+- Download the [Colorizer checkpoint](https://drive.google.com/file/d/1jzI9pW4Izdu_0U1LBp12I25P_6pI_OUZ/view?usp=share_link) to `checkpoints_colorizer/`.
+- To generate colored images without training the model, download the [Colorizer Combined checkpoint](https://drive.google.com/file/d/1SYza54vm13bc2fZkwlyWYn6MBGlHLA9_/view?usp=share_link) to `checkpoints_combined_model/`.
 - Run `combined_model_inference.py`
 
 ### Calculate MSE, SSIM and PSNR Metrics for both Colorizer Models
-- Download the [Captioning checkpoint](https://drive.google.com/drive/folders/1uVuNwwoAZTdtsfwvYrqopBUY08KW-3tC?usp=sharing) to `checkpoints_captioning/`.
-- Download the [Colorizer checkpoint](https://drive.google.com/drive/folders/1uVuNwwoAZTdtsfwvYrqopBUY08KW-3tC?usp=sharing) to `checkpoints_colorizer/`.
-- Download the [Colorizer Combined checkpoint](https://drive.google.com/drive/folders/1uVuNwwoAZTdtsfwvYrqopBUY08KW-3tC?usp=sharing) to `checkpoints_combined_model/`.
+- Download the [Captioning checkpoint](https://drive.google.com/file/d/1tP76-ii6Llcaqd7DqTtBa0Fpk2rETIX3/view?usp=share_link) to `checkpoints_captioning/`.
+- Download the [Colorizer checkpoint](https://drive.google.com/file/d/1jzI9pW4Izdu_0U1LBp12I25P_6pI_OUZ/view?usp=share_link) to `checkpoints_colorizer/`.
+- Download the [Colorizer Combined checkpoint](https://drive.google.com/file/d/1SYza54vm13bc2fZkwlyWYn6MBGlHLA9_/view?usp=share_link) to `checkpoints_combined_model/`.
 - Run `evaluation.py`
 
 
