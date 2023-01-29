@@ -20,7 +20,7 @@ Repository for a "Pattern Recognition" assignment that uses Pytorch.
 - To generate colored images without training the model, download the [Colorizer checkpoint](https://drive.google.com/file/d/1jzI9pW4Izdu_0U1LBp12I25P_6pI_OUZ/view?usp=share_link) to `checkpoints_colorizer/`.
 - Run `colorizer_inference.py`
 
-### Train Combiend Model
+### Train Combined Model
 - Download the [Captioning checkpoint](https://drive.google.com/file/d/1tP76-ii6Llcaqd7DqTtBa0Fpk2rETIX3/view?usp=share_link) to `checkpoints_captioning/`.
 - Download the [Colorizer checkpoint](https://drive.google.com/file/d/1jzI9pW4Izdu_0U1LBp12I25P_6pI_OUZ/view?usp=share_link) to `checkpoints_colorizer/`.
 - Run `combined_model_train.py`
