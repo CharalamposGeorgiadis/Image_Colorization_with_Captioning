@@ -3,7 +3,7 @@ Repository for a "Pattern Recognition" assignment that uses Pytorch.
 
 ## INSTRUCTIONS
 - Download [train_captions](https://drive.google.com/file/d/1D3EzUK1d1lNhD2hAvRiKPThidiVbP2K_/view?usp=sharing) to `data/`.
-- Download [training images](http://images.cocodataset.org/zips/train2014.zip), [validation images](http://images.cocodataset.org/zips/val2014.zip) and [test images](http://images.cocodataset.org/zips/test2014.zip) and unzip to `data/`.
+- Download [training images](http://images.cocodataset.org/zips/train2014.zip), [validation images](http://images.cocodataset.org/zips/val2014.zip) and [test images](https://drive.google.com/file/d/1UBZmizwIS_wNYljEdnsLs3Q5f4kwc62p/view?usp=share_link) and unzip to `data/`.
 
 ### Train Image Captioning
 - Run `parse_coco.py`
