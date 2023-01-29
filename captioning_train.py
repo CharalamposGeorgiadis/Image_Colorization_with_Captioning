@@ -9,6 +9,7 @@ import sys
 from typing import Tuple
 from torch.optim import AdamW
 from captioning_model import ClipCaptionModel
+from IPython.display import clear_output
 
 if torch.cuda.is_available():
     device = "cuda"
@@ -92,7 +93,9 @@ def train(dataset, model, output_dir):
                                                 num_training_steps=epochs * len(train_dataloader))
 
     for epoch in range(epochs):
+        clear_output()
         print(f">>> Training epoch {epoch}")
+        clear_output()
         sys.stdout.flush()
         progress = tqdm(total=len(train_dataloader))
         for idx, (tokens, mask, prefix) in enumerate(train_dataloader):

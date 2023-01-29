@@ -1,23 +1,22 @@
-import numpy as np
 import torch
 import os
-from skimage.metrics import mean_squared_error
-from skimage.metrics import structural_similarity as ssim
-from skimage.metrics import peak_signal_noise_ratio as psnr
-from PIL import Image
-import clip
-from combined_model import CombinedColorizationModel
-from transformers import GPT2Tokenizer
 from captioning_model import ClipCaptionModel
-from colorizer_model import Generator
 import skimage.io as io
-from skimage.color import rgb2lab
-import torch.nn.functional as nnf
-import skimage.io
 import PIL.Image
+import clip
 from torchvision import transforms
-import scipy.stats as stats
+from combined_model import CombinedColorizationModel
+from colorizer_model import Generator
+from skimage.color import rgb2lab
+import torch.nn as nn
+from torch.utils.data import Dataset, DataLoader
+import glob
+import skimage.io
+from IPython.display import clear_output
 from tqdm import tqdm
+from transformers import GPT2Tokenizer
+import torch.nn.functional as nnf
+import sys
 
 if torch.cuda.is_available():
     device = "cuda"
@@ -41,35 +40,28 @@ colorization_model = Generator().to(device)
 colorization_model.load_state_dict(cpkt['G_state_dict'])
 colorization_model.eval()
 
-combined_path = os.path.join('checkpoints_combined_model/cp-4.pt')
-input_size = 5376  # the size of the combined embedding
-hidden_size = 3072  # the number of the final image
-output_size = 3072  # the number of the final image
-combined_model = CombinedColorizationModel(input_size, hidden_size, output_size)
-combined_model = combined_model.to(device)
-combined_model.load_state_dict(torch.load(combined_path, map_location=device))
-combined_model.eval()
 
+class ImageDataset(Dataset):
+    def __init__(self, data_dir):
+        self.data_dir = data_dir
+        self.image_paths = glob.glob(os.path.join(data_dir, '*.jpg'))
 
-def load_images(dir_path):
-    # initialize an empty list to store the images
-    original_images = []
-    generated_images = []
-    combined_features = []
-    # iterate through all the files in the directory
-    for file_name in tqdm(os.listdir(dir_path)):
-        gray_image = io.imread(dir_path + file_name, as_gray=True) * 255
-        rgb_image = io.imread(dir_path + file_name)
+    def __len__(self):
+        return len(self.image_paths)
 
-        rgb_image = skimage.transform.resize(rgb_image, (256, 256))
+    def __getitem__(self, idx):
+        target_image = io.imread(self.image_paths[idx])
+        gray_image = io.imread(self.image_paths[idx], as_gray=True) * 255
+
+        target_image = skimage.transform.resize(target_image, (256, 256))
         gray_image = skimage.transform.resize(gray_image, (32, 32))
 
         gray_image = PIL.Image.fromarray(gray_image)
 
-        lab_image = transforms.ToTensor()(rgb_to_lab(rgb_image))
+        lab_image = transforms.ToTensor()(rgb_to_lab(target_image))
         lab_image = lab_image.unsqueeze(0).to(device)
 
-        rgb_image = skimage.transform.resize(rgb_image, (32, 32))
+        target_image = skimage.transform.resize(target_image, (32, 32))
 
         with torch.no_grad():
             pil_image = preprocess(gray_image).unsqueeze(0).to(device)
@@ -86,14 +78,13 @@ def load_images(dir_path):
 
             generated_image = colorization_model(lab_image)
             generated_image = transforms.Resize((32, 32))(generated_image)
-            generated_images.append(np.transpose(generated_image.cpu().detach().clone().numpy()[0], (1, 2, 0)))
             generated_image = generated_image.view(1, 3 * 32 * 32)
 
-            combined_feature = torch.cat((token_embeddings, generated_image), 1).float()
-            combined_features.append(combined_feature)
-            original_images.append(rgb_image)
+            combined_features = torch.cat((token_embeddings, generated_image), 1).float().to(device)
 
-    return combined_features, original_images, generated_images
+        target_image = torch.from_numpy(target_image).float().to(device)
+
+        return combined_features, target_image
 
 
 def get_token_embedings(model, tokenizer, embed):
@@ -156,48 +147,74 @@ def rgb_to_lab(rgb):
     return lab_img
 
 
-def evaluate_predictions(model_output, ground_truth):
-    # Calculate the mean squared error
-    mse = mean_squared_error(ground_truth, model_output)
-
-    # Calculate the Structural Similarity Index (SSIM)
-    ssim_value = ssim(ground_truth, model_output, channel_axis=-1)
-
-    # Calculate Peak Signal to Noise Ratio (PSNR)
-    psnr_value = psnr(ground_truth, model_output)
-
-    return mse, ssim_value, psnr_value
-
-
 def main():
-    # Load the model's output and ground truth image
-    combined_features, original_images, generated_images = load_images('data/test2014/')
-    mse_color = []
-    mse_combine = []
-    ssim_color = []
-    ssim_combine = []
-    psnr_color = []
-    psnr_combine = []
-    for i in range(len(combined_features)):
-        mse, ssim, psnr = evaluate_predictions(original_images[i].astype(np.float32), generated_images[i].astype(np.float32))
-        mse_color.append(mse)
-        ssim_color.append(ssim)
-        psnr_color.append(psnr)
+    n_epochs = 100
+    batch_size = 64
 
-        colored_image = combined_model(combined_features[i], 1)[0].cpu().detach().numpy()
-        mse, ssim, psnr = evaluate_predictions(original_images[i].astype(np.float32), colored_image.astype(np.float32))
-        mse_combine.append(mse)
-        ssim_combine.append(ssim)
-        psnr_combine.append(psnr)
+    # Loading data
+    training_dir = 'data/train2014/'
+    val_dir = 'data/val2014/'
 
-    print(f'Image Colorization Metrics: '
-          f'MSE: {np.mean(mse_color)}, '
-          f'SSIM: {np.mean(ssim_color)}, '
-          f'PSNR: {np.mean(psnr_color)}')
-    print(f'Image Colorization with Captions Metrics: '
-          f'MSE: {np.mean(mse_color)}, '
-          f'SSIM: {np.mean(ssim_color)}, '
-          f'PSNR: {np.mean(psnr_color)}')
+    train_set = ImageDataset(training_dir)
+    train_set = DataLoader(train_set, batch_size=batch_size, shuffle=True)
+
+    val_set = ImageDataset(val_dir)
+    val_set = DataLoader(val_set, batch_size=batch_size, shuffle=True)
+
+    input_size = 5376  # the size of the combined embedding
+    hidden_size = 3072  # the number of the final image
+    output_size = 3072  # the number of the final image
+
+    combined_model = CombinedColorizationModel(input_size, hidden_size, output_size)
+    combined_model = combined_model.to(device)
+    combined_model.train()
+
+    criterion = nn.MSELoss()
+    optimizer = torch.optim.Adam(combined_model.parameters(), lr=2e-4, betas=(0.5, 0.999))
+
+    # Minimum validation loss
+    best_val_loss = float('inf')
+
+    for epoch in range(n_epochs):
+        clear_output()
+        print(f">>> Training Epoch {epoch + 1}")
+        clear_output()
+        sys.stdout.flush()
+        progress = tqdm(total=len(train_set))
+        # Training
+        for features, target_images in train_set:
+            # Forward pass
+            optimizer.zero_grad()
+            colored_image = combined_model(features, len(features)).to(device)
+            loss = criterion(colored_image, target_images.to(device)).to(device)
+
+            # Back propagation
+            loss.backward()
+            optimizer.step()
+
+            progress.set_postfix({"Training Loss": loss.item()})
+            progress.update()
+        progress.close()
+        # Validation
+        val_loss = 0
+        clear_output()
+        print(f">>> Validation Epoch {epoch + 1}")
+        clear_output()
+        sys.stdout.flush()
+        progress = tqdm(total=len(val_set))
+        for features, target_images in val_set:
+            with torch.no_grad():
+                colored_image = combined_model(features, len(features)).to(device)
+                loss = criterion(colored_image.to(device), target_images.to(device)).to(device)
+                val_loss += loss.item()
+                progress.set_postfix({"Validation Loss": loss.item()})
+                progress.update()
+        progress.close()
+        # If the model achieved a validation loss lower than the previous best one, the current model parameters are
+        # saved
+        if val_loss < best_val_loss:
+            best_val_loss = val_loss
+            torch.save(combined_model.state_dict(), 'checkpoints_combined_model/cp-{}.pt'.format(epoch))
 
 
 if __name__ == '__main__':

@@ -1,9 +1,5 @@
-import numpy as np
 import torch
 import os
-from skimage.metrics import mean_squared_error
-from skimage.metrics import structural_similarity as ssim
-from skimage.metrics import peak_signal_noise_ratio as psnr
 from PIL import Image
 import clip
 from combined_model import CombinedColorizationModel
@@ -16,8 +12,9 @@ import torch.nn.functional as nnf
 import skimage.io
 import PIL.Image
 from torchvision import transforms
-import scipy.stats as stats
 from tqdm import tqdm
+import matplotlib.pyplot as plt
+import numpy as np
 
 if torch.cuda.is_available():
     device = "cuda"
@@ -42,9 +39,14 @@ colorization_model.load_state_dict(cpkt['G_state_dict'])
 colorization_model.eval()
 
 combined_path = os.path.join('checkpoints_combined_model/cp-4.pt')
-input_size = 5376  # the size of the combined embedding
-hidden_size = 3072  # the number of the final image
-output_size = 3072  # the number of the final image
+# input_size = 5376  # the size of the combined embedding
+# hidden_size = 3072  # the number of the final image
+# output_size = 3072  # the number of the final image
+
+input_size = 3 * 32 * 32 + 12 * 192  # the size of the combined embedding
+hidden_size = 3 * 32 * 32  # the number of the final image
+output_size = 3 * 32 * 32  # the number of the final image
+
 combined_model = CombinedColorizationModel(input_size, hidden_size, output_size)
 combined_model = combined_model.to(device)
 combined_model.load_state_dict(torch.load(combined_path, map_location=device))
@@ -54,10 +56,9 @@ combined_model.eval()
 def load_images(dir_path):
     # initialize an empty list to store the images
     original_images = []
-    generated_images = []
     combined_features = []
     # iterate through all the files in the directory
-    for file_name in tqdm(os.listdir(dir_path)):
+    for file_name in tqdm(os.listdir(dir_path), desc="Loading Test Images"):
         gray_image = io.imread(dir_path + file_name, as_gray=True) * 255
         rgb_image = io.imread(dir_path + file_name)
 
@@ -77,6 +78,8 @@ def load_images(dir_path):
             prefix = clip_model.encode_image(pil_image).to(device, dtype=torch.float32)
             prefix_embed = captioning_model.clip_project(prefix).reshape(1, prefix_length, -1)
             token_embeddings = get_token_embedings(captioning_model, tokenizer, embed=prefix_embed).to(device)
+            # token_embeddings = transforms.Resize((12, 192))(token_embeddings)
+            # token_embeddings = token_embeddings.view(1, 12 * 192)
             token_embeddings = transforms.Resize((12, 192))(token_embeddings)
             token_embeddings = token_embeddings.view(1, 12 * 192)
 
@@ -86,14 +89,13 @@ def load_images(dir_path):
 
             generated_image = colorization_model(lab_image)
             generated_image = transforms.Resize((32, 32))(generated_image)
-            generated_images.append(np.transpose(generated_image.cpu().detach().clone().numpy()[0], (1, 2, 0)))
             generated_image = generated_image.view(1, 3 * 32 * 32)
 
             combined_feature = torch.cat((token_embeddings, generated_image), 1).float()
             combined_features.append(combined_feature)
             original_images.append(rgb_image)
 
-    return combined_features, original_images, generated_images
+    return combined_features, original_images
 
 
 def get_token_embedings(model, tokenizer, embed):
@@ -156,48 +158,19 @@ def rgb_to_lab(rgb):
     return lab_img
 
 
-def evaluate_predictions(model_output, ground_truth):
-    # Calculate the mean squared error
-    mse = mean_squared_error(ground_truth, model_output)
-
-    # Calculate the Structural Similarity Index (SSIM)
-    ssim_value = ssim(ground_truth, model_output, channel_axis=-1)
-
-    # Calculate Peak Signal to Noise Ratio (PSNR)
-    psnr_value = psnr(ground_truth, model_output)
-
-    return mse, ssim_value, psnr_value
-
-
 def main():
-    # Load the model's output and ground truth image
-    combined_features, original_images, generated_images = load_images('data/test2014/')
-    mse_color = []
-    mse_combine = []
-    ssim_color = []
-    ssim_combine = []
-    psnr_color = []
-    psnr_combine = []
+    combined_features, original_images = load_images('data/test2014/')
     for i in range(len(combined_features)):
-        mse, ssim, psnr = evaluate_predictions(original_images[i].astype(np.float32), generated_images[i].astype(np.float32))
-        mse_color.append(mse)
-        ssim_color.append(ssim)
-        psnr_color.append(psnr)
-
-        colored_image = combined_model(combined_features[i], 1)[0].cpu().detach().numpy()
-        mse, ssim, psnr = evaluate_predictions(original_images[i].astype(np.float32), colored_image.astype(np.float32))
-        mse_combine.append(mse)
-        ssim_combine.append(ssim)
-        psnr_combine.append(psnr)
-
-    print(f'Image Colorization Metrics: '
-          f'MSE: {np.mean(mse_color)}, '
-          f'SSIM: {np.mean(ssim_color)}, '
-          f'PSNR: {np.mean(psnr_color)}')
-    print(f'Image Colorization with Captions Metrics: '
-          f'MSE: {np.mean(mse_color)}, '
-          f'SSIM: {np.mean(ssim_color)}, '
-          f'PSNR: {np.mean(psnr_color)}')
+        with torch.no_grad():
+            colored_image = combined_model(combined_features[i], 1)[0].cpu().detach().numpy()
+            original_image = original_images[i]
+            stack_image = np.hstack((original_image, colored_image))
+            fig = plt.figure()
+            ax = plt.Axes(fig, [0., 0., 1., 1.])
+            ax.set_axis_off()
+            fig.add_axes(ax)
+            ax.imshow(stack_image)
+            plt.show()
 
 
 if __name__ == '__main__':
